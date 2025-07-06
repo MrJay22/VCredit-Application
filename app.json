@@ -1,11 +1,8 @@
 {
   "expo": {
     "scheme": "acme",
-    "plugins": [
-      "expo-router"
-    ],
-    "name": "OCredit",
-    "slug": "OCredit",
+    "name": "VCredit",
+    "slug": "VCredit",
     "splash": {
       "image": "./src/assets/ocredit.png",
       "resizeMode": "contain",
@@ -13,10 +10,12 @@
     },
     "icon": "./src/assets/ocredit.png",
     "extra": {
-      "router": {},
       "eas": {
-        "projectId": "89ab100e-c313-40b5-98f1-aaf551106a13"
+        "projectId": "106c1cb8-9f85-466c-b2b7-a12090200e9d"
       }
+    },
+    "android": {
+      "package": "com.mrjay22.VCredit"
     }
   }
 }
