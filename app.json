@@ -7,6 +7,14 @@
       "image": "./src/assets/ocredit.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "37146956-b86a-49c2-95cf-34778d9d851f"
+      }
+    },
+    "android": {
+      "package": "com.mrjay22.VCredit"
     }
   }
 }
