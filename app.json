@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "plugins": [
+      "expo-router"
+    ],
+    "name": "OCredit",
+    "slug": "OCredit",
+    "splash": {
+      "image": "./src/assets/ocredit.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "icon": "./src/assets/ocredit.png",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "89ab100e-c313-40b5-98f1-aaf551106a13"
+      }
+    }
+  }
+}
