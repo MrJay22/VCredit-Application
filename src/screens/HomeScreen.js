@@ -7,6 +7,7 @@ import { Ionicons, MaterialIcons, FontAwesome5, Entypo } from '@expo/vector-icon
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import api from '../api/client';
+import { SafeAreaView } from 'react-native-safe-area-context'; // ✅ ADDED
 
 const services = [
   { name: 'Airtime', icon: <MaterialIcons name="flash-on" size={20} color="#6A0DAD" />, screen: 'AirtimeScreen' },
@@ -56,21 +57,10 @@ const HomeScreen = () => {
 
       const { hasCompletedForm, status } = response.data;
 
-      if (!hasCompletedForm) {
-        return navigation.navigate('VerifyProfile');
-      }
-
-      if (status === 'pending') {
-        return navigation.navigate('RepaymentScreen'); // pending approval
-      }
-
-      if (['running', 'overdue', 'active'].includes(status)) {
-        return navigation.navigate('WalletScreen');
-      }
-
-      if (['declined', 'cleared'].includes(status) || !status) {
-        return navigation.navigate('ApplyNow');
-      }
+      if (!hasCompletedForm) return navigation.navigate('VerifyProfile');
+      if (status === 'pending') return navigation.navigate('RepaymentScreen');
+      if (['running', 'overdue', 'active'].includes(status)) return navigation.navigate('WalletScreen');
+      if (['declined', 'cleared'].includes(status) || !status) return navigation.navigate('ApplyNow');
 
       Alert.alert('Notice', 'Unexpected loan status: ' + status);
     } catch (error) {
@@ -87,56 +77,58 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <View style={styles.header}>
-        <Text style={styles.logo}>VCredit</Text>
-        <Ionicons name="notifications-outline" size={26} color="#6A0DAD" />
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FF' }} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.header}>
+          <Text style={styles.logo}>VCredit</Text>
+          <Ionicons name="notifications-outline" size={26} color="#6A0DAD" />
+        </View>
 
-      <Text style={styles.greeting}>Hello, {firstName} 👋</Text>
+        <Text style={styles.greeting}>Hello, {firstName} 👋</Text>
 
-      <View style={styles.eligibilityCard}>
-        <Text style={styles.eligibilityText}>You're eligible for up to</Text>
-        <Text style={styles.eligibilityAmount}>₦250,000</Text>
-      </View>
+        <View style={styles.eligibilityCard}>
+          <Text style={styles.eligibilityText}>You're eligible for up to</Text>
+          <Text style={styles.eligibilityAmount}>₦{eligible.toLocaleString()}</Text>
+        </View>
 
-      <View style={styles.ctaContainer}>
-        <TouchableOpacity style={styles.ctaButtonOutline} onPress={handleApplyNow}>
-          <Text style={styles.ctaTextOutline}>{getButtonLabel()}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.servicesRow}>
-        {services.map((item) => (
-          <TouchableOpacity
-            style={styles.serviceItem}
-            key={item.name}
-            onPress={() => navigation.navigate(item.screen)}
-          >
-            {item.icon}
-            <Text style={styles.serviceLabel}>{item.name}</Text>
+        <View style={styles.ctaContainer}>
+          <TouchableOpacity style={styles.ctaButtonOutline} onPress={handleApplyNow}>
+            <Text style={styles.ctaTextOutline}>{getButtonLabel()}</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slider}>
-        {[1, 2, 3].map((_, i) => (
-          <Image
-            key={i}
-            source={{ uri: `https://via.placeholder.com/300x120?text=Promo+${i + 1}` }}
-            style={styles.sliderImage}
-          />
-        ))}
+        <View style={styles.servicesRow}>
+          {services.map((item) => (
+            <TouchableOpacity
+              style={styles.serviceItem}
+              key={item.name}
+              onPress={() => navigation.navigate(item.screen)}
+            >
+              {item.icon}
+              <Text style={styles.serviceLabel}>{item.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slider}>
+          {[1, 2, 3].map((_, i) => (
+            <Image
+              key={i}
+              source={{ uri: `https://via.placeholder.com/300x120?text=Promo+${i + 1}` }}
+              style={styles.sliderImage}
+            />
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity style={styles.chatButton}>
+          <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
+        </TouchableOpacity>
       </ScrollView>
-
-      <TouchableOpacity style={styles.chatButton}>
-        <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
-      </TouchableOpacity>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -144,10 +136,9 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#F8F5FF',
     paddingHorizontal: 20,
     paddingTop: 50,
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',

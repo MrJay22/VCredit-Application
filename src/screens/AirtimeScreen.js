@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const networks = [
   { id: 'mtn', name: 'MTN', logo: require('../assets/mtn.jpg') },
@@ -26,56 +29,76 @@ export default function AirtimeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.pageTitle}>Buy Airtime</Text>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 80 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.pageTitle}>Buy Airtime</Text>
 
-      <Text style={styles.sectionLabel}>Select Network</Text>
-      <View style={styles.networkRow}>
-        {networks.map((net) => (
-          <TouchableOpacity
-            key={net.id}
-            onPress={() => setSelectedNetwork(net.id)}
-            style={[styles.networkCard, selectedNetwork === net.id && styles.selectedNetwork]}
-          >
-            <Image source={net.logo} style={styles.networkLogo} />
-            <Text style={styles.networkName}>{net.name}</Text>
+          <Text style={styles.sectionLabel}>Select Network</Text>
+          <View style={styles.networkRow}>
+            {networks.map((net) => (
+              <TouchableOpacity
+                key={net.id}
+                onPress={() => setSelectedNetwork(net.id)}
+                style={[
+                  styles.networkCard,
+                  selectedNetwork === net.id && styles.selectedNetwork,
+                ]}
+              >
+                <Image source={net.logo} style={styles.networkLogo} />
+                <Text style={styles.networkName}>{net.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.sectionLabel}>Phone Number</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="phone-pad"
+            placeholder="Enter phone number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+
+          <Text style={styles.sectionLabel}>Amount</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder="₦ Amount"
+            value={amount}
+            onChangeText={setAmount}
+          />
+
+          <View style={styles.noticeBoard}>
+            <Text style={styles.noticeTitle}>Notice</Text>
+            <Text style={styles.noticeText}>
+              Glo airtime service is currently unavailable. Please try again later.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitText}>Buy Now</Text>
           </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.sectionLabel}>Phone Number</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="phone-pad"
-        placeholder="Enter phone number"
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-      />
-
-      <Text style={styles.sectionLabel}>Amount</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        placeholder="₦ Amount"
-        value={amount}
-        onChangeText={setAmount}
-      />
-
-      <View style={styles.noticeBoard}>
-        <Text style={styles.noticeTitle}>Notice</Text>
-        <Text style={styles.noticeText}>Glo airtime service is currently unavailable. Please try again later.</Text>
-      </View>
-
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Buy Now</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
+    flex: 1,
     backgroundColor: '#F8F5FF',
+  },
+  container: {
+    flex: 1,
     padding: 20,
   },
   pageTitle: {

@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   StyleSheet,
+  SafeAreaView,
 } from 'react-native';
 
 const networks = [
@@ -122,8 +123,8 @@ const dummyPlans = {
       { id: 63, size: '20GB', price: '₦6000', validity: '30 Days' },
       { id: 64, size: '25GB', price: '₦7500', validity: '30 Days' },
     ],
-  },
-};
+    }
+  };
 
 export default function DataScreen() {
   const [selectedNetwork, setSelectedNetwork] = useState('mtn');
@@ -133,67 +134,91 @@ export default function DataScreen() {
   const plans = dummyPlans[selectedNetwork]?.[selectedCategory] || [];
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Buy Data</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5FF' }}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Top Title */}
+        <View style={styles.topBar}>
+          <Text style={styles.topBarText}>Buy Data</Text>
+        </View>
 
-      <Text style={styles.sectionTitle}>Select Network</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
-        {networks.map((net) => (
-          <TouchableOpacity
-            key={net.id}
-            style={[styles.networkCard, selectedNetwork === net.id && styles.activeCard]}
-            onPress={() => setSelectedNetwork(net.id)}
-          >
-            <Image source={net.logo} style={styles.logo} />
-            <Text style={styles.networkText}>{net.name}</Text>
-          </TouchableOpacity>
-        ))}
+        <Text style={styles.sectionTitle}>Select Network</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
+          {networks.map((net) => (
+            <TouchableOpacity
+              key={net.id}
+              style={[styles.networkCard, selectedNetwork === net.id && styles.activeCard]}
+              onPress={() => setSelectedNetwork(net.id)}
+            >
+              <Image source={net.logo} style={styles.logo} />
+              <Text style={styles.networkText}>{net.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <Text style={styles.sectionTitle}>Select Category</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.categoryButton, selectedCategory === cat && styles.activeCategory]}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text style={styles.categoryText}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <View style={styles.planGrid}>
+          {plans.map((plan) => (
+            <TouchableOpacity key={plan.id} style={styles.planCard}>
+              <Text style={styles.planSize}>{plan.size}</Text>
+              <Text style={styles.planPrice}>{plan.price}</Text>
+              <Text style={styles.planValidity}>{plan.validity}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Phone Number</Text>
+        <TextInput
+          placeholder="Enter phone number"
+          keyboardType="phone-pad"
+          style={styles.input}
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+        />
+
+        <TouchableOpacity style={styles.buyButton}>
+          <Text style={styles.buyText}>Buy Now</Text>
+        </TouchableOpacity>
       </ScrollView>
-
-      <Text style={styles.sectionTitle}>Select Category</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
-        {categories.map((cat) => (
-          <TouchableOpacity
-            key={cat}
-            style={[styles.categoryButton, selectedCategory === cat && styles.activeCategory]}
-            onPress={() => setSelectedCategory(cat)}
-          >
-            <Text style={styles.categoryText}>{cat}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <View style={styles.planGrid}>
-        {plans.map((plan) => (
-          <TouchableOpacity key={plan.id} style={styles.planCard}>
-            <Text style={styles.planSize}>{plan.size}</Text>
-            <Text style={styles.planPrice}>{plan.price}</Text>
-            <Text style={styles.planValidity}>{plan.validity}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.sectionTitle}>Phone Number</Text>
-      <TextInput
-        placeholder="Enter phone number"
-        keyboardType="phone-pad"
-        style={styles.input}
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-      />
-
-      <TouchableOpacity style={styles.buyButton}>
-        <Text style={styles.buyText}>Buy Now</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F5FF', padding: 16 },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#6A0DAD', marginBottom: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', marginVertical: 10, color: '#333' },
-  horizontalList: { marginBottom: 10 },
+  topBar: {
+    alignItems: 'left',
+    marginBottom: 10,
+    paddingVertical: 20,
+  },
+  topBarText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#6A0DAD',
+  },
+  container: {
+    padding: 16,
+    backgroundColor: '#F8F5FF',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginVertical: 10,
+    color: '#333',
+  },
+  horizontalList: {
+    marginBottom: 10,
+  },
   networkCard: {
     alignItems: 'center',
     marginRight: 20,
@@ -203,9 +228,20 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
-  activeCard: { borderColor: '#6A0DAD', borderWidth: 2 },
-  logo: { width: 40, height: 40, resizeMode: 'contain' },
-  networkText: { fontSize: 12, marginTop: 5, color: '#333' },
+  activeCard: {
+    borderColor: '#6A0DAD',
+    borderWidth: 2,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  networkText: {
+    fontSize: 12,
+    marginTop: 5,
+    color: '#333',
+  },
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -213,8 +249,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
-  activeCategory: { backgroundColor: '#6A0DAD' },
-  categoryText: { color: '#fff', fontSize: 13, fontWeight: '500' },
+  activeCategory: {
+    backgroundColor: '#6A0DAD',
+  },
+  categoryText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '500',
+  },
   planGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -231,9 +273,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 1,
   },
-  planSize: { fontSize: 13, fontWeight: '600', color: '#000' },
-  planPrice: { color: '#6A0DAD', fontWeight: '600', marginVertical: 2, fontSize: 12 },
-  planValidity: { fontSize: 11, color: '#666' },
+  planSize: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#000',
+  },
+  planPrice: {
+    color: '#6A0DAD',
+    fontWeight: '600',
+    marginVertical: 2,
+    fontSize: 12,
+  },
+  planValidity: {
+    fontSize: 11,
+    color: '#666',
+  },
   input: {
     backgroundColor: '#fff',
     padding: 14,
@@ -247,6 +301,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 40,
   },
   buyText: {
     color: '#fff',

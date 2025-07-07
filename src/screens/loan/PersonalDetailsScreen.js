@@ -45,7 +45,7 @@ export default function PersonalDetailsScreen({ navigation }) {
 
   const handleNext = () => {
     if (nin.length !== 11) {
-      return Alert.alert('Invalid NIN', 'NIN must be exactly 11 digits.');
+      return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
     }
     if (!dob || !address || !photo || !bankName || !accountNumber || !accountName) {
       return Alert.alert('Incomplete Form', 'Please complete all fields.');
@@ -76,7 +76,7 @@ export default function PersonalDetailsScreen({ navigation }) {
         <Text style={styles.label}>Phone Number</Text>
         <TextInput style={styles.input} value={user?.phone || ''} editable={false} />
 
-        <Text style={styles.label}>NIN   *Loan Auto Disqualify if Invalid</Text>
+        <Text style={styles.label}>BVN   *Loan Auto Disqualify if Invalid</Text>
         <TextInput
           style={styles.input}
           value={nin}
@@ -94,7 +94,7 @@ export default function PersonalDetailsScreen({ navigation }) {
         <Text style={styles.label}>Account Name</Text>
         <TextInput style={styles.input} value={accountName} onChangeText={setaccountName} />
 
-        <Text style={styles.label}>Date of Birth</Text>
+        <Text style={styles.label}>Date of Birth   *Must match with BVN</Text>
         <TouchableOpacity
           style={[styles.input, { justifyContent: 'center' }]}
           onPress={() => setShowDatePicker(true)}
@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginBottom: 35,
   },
   nextText: {
     color: '#fff',

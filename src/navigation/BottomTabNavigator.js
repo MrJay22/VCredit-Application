@@ -48,23 +48,26 @@ export default function BottomTabNavigator() {
   );
 }
 
+
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: Platform.OS === 'ios' ? 80 : 70,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-    paddingTop:10,
-    // Remove shadow & elevation for flat design
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 0,
     position: 'absolute',
     left: 0,
     right: 0,
+    bottom: 0,
+    height: Platform.OS === 'ios' ? 100 : 100,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 40, // 🔥 Increased to fix Android overlap
+    paddingTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: -3 },
+    shadowRadius: 4,
+    elevation: 10,
   },
 });
+
+
 

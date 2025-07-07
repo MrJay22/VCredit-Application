@@ -13,64 +13,62 @@ import { AuthContext } from '../../context/AuthContext';
 import api from '../../api/client';
 
 export default function ReviewAndSubmitScreen({ navigation, route }) {
-  const { name, phone, nin, bankName, accountNumber, accountName, dob, address, photo, guarantors } = route.params;
+  const {
+    name, phone, nin, bankName, accountNumber, accountName,
+    dob, address, photo, guarantors,
+  } = route.params;
+
   const guarantor1 = guarantors?.guarantor1 || {};
   const guarantor2 = guarantors?.guarantor2 || {};
+  const emergencyContact = guarantors?.emergencyContact || {};
   const { user, token } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-  try {
-    if (!nin || !bankName || !accountNumber || !accountName|| !dob || !address || !photo || !guarantor1.name || !guarantor2.name) {
-      return Alert.alert('Incomplete', 'Please complete all required fields.');
+    try {
+      if (
+        !nin || !bankName || !accountNumber || !accountName ||
+        !dob || !address || !photo || !guarantor1.name || !guarantor2.name
+      ) {
+        return Alert.alert('Incomplete', 'Please complete all required fields.');
+      }
+
+      setLoading(true);
+
+      const payload = {
+        personalDetails: {
+          name: user.name,
+          phone: user.phone,
+          nin,
+          bankName,
+          accountNumber,
+          accountName,
+          dob,
+          address,
+        },
+        photo,
+        guarantor1,
+        guarantor2,
+      };
+
+      await api.post('/api/loan/apply', payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      Alert.alert('Success', 'Loan application submitted');
+      navigation.reset({ index: 0, routes: [{ name: 'LoanApprovalScreen' }] });
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-
-    const payload = {
-      personalDetails: {
-        name: user.name,
-        phone: user.phone,
-        nin,
-        bankName, 
-        accountNumber, 
-        accountName,
-        dob,
-        address,
-      },
-      photo,
-      guarantor1,
-      guarantor2,
-    };
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    await api.post('/api/loan/apply', payload, config);
-
-    Alert.alert('Success', 'Loan application submitted');
-
-    // ✅ Updated: Go to LoanApprovalScreen instead of MainTabs
-    navigation.reset({ index: 0, routes: [{ name: 'LoanApprovalScreen' }] });
-
-  } catch (err) {
-    console.error(err);
-    Alert.alert('Error', 'Something went wrong. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       <Text style={styles.title}>Review Your Loan Application</Text>
 
-      {/* Header Row: Name + Photo */}
       <View style={styles.headerRow}>
         <View style={styles.headerInfo}>
           <Text style={styles.nameText}>{name}</Text>
@@ -81,7 +79,6 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
         )}
       </View>
 
-      {/* Personal Info */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Personal Information</Text>
         <Info label="NIN" value={nin} />
@@ -92,7 +89,6 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
         <Info label="Address" value={address} />
       </View>
 
-      {/* Guarantor 1 */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Guarantor 1</Text>
         <Info label="Full Name" value={guarantor1.name} />
@@ -100,7 +96,6 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
         <Info label="Relationship" value={guarantor1.relationship} />
       </View>
 
-      {/* Guarantor 2 */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Guarantor 2</Text>
         <Info label="Full Name" value={guarantor2.name} />
@@ -108,7 +103,13 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
         <Info label="Relationship" value={guarantor2.relationship} />
       </View>
 
-      {/* Buttons */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Emergency Contact</Text>
+        <Info label="Full Name" value={emergencyContact.name} />
+        <Info label="Phone Number" value={emergencyContact.phone} />
+        <Info label="Relationship" value={emergencyContact.relationship} />
+      </View>
+
       <View style={styles.buttonGroup}>
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
           <Text style={styles.editButtonText}>Edit</Text>
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#6A0DAD',
     textAlign: 'center',
+    marginTop: 20,
   },
   headerRow: {
     flexDirection: 'row',

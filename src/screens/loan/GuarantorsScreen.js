@@ -1,16 +1,17 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { AuthContext } from '../../context/AuthContext'; // ✅ Import Auth context
+import { AuthContext } from '../../context/AuthContext';
 
 const GuarantorsScreen = ({ navigation, route }) => {
-  const { user } = useContext(AuthContext); // ✅ Use user from context
+  const { user } = useContext(AuthContext);
 
-  const { nin, bankName, accountNumber, accountName, dob, address, photo } = route.params; // ✅ Get other data from route params
+  const { nin, bankName, accountNumber, accountName, dob, address, photo } = route.params;
 
   const [step, setStep] = useState(1);
   const [guarantors, setGuarantors] = useState({
     guarantor1: { name: '', phone: '', relationship: '' },
     guarantor2: { name: '', phone: '', relationship: '' },
+    emergencyContact: { name: '', phone: '', relationship: '' },
   });
 
   const handleChange = (key, field, value) => {
@@ -27,33 +28,38 @@ const GuarantorsScreen = ({ navigation, route }) => {
   const prevStep = () => setStep(step - 1);
 
   const handleSubmit = () => {
-    navigation.navigate('ReviewAndSubmitScreen', {  
-        name: user.name,
-        phone: user.phone,
-        nin,
-        bankName,
-        accountNumber,
-        accountName,
-        dob,
-        address,
-        photo,
-        guarantors,
+    navigation.navigate('ReviewAndSubmitScreen', {
+      name: user.name,
+      phone: user.phone,
+      nin,
+      bankName,
+      accountNumber,
+      accountName,
+      dob,
+      address,
+      photo,
+      guarantors,
     });
   };
 
-  const current = step === 1 ? 'guarantor1' : 'guarantor2';
+  const stepKeys = ['guarantor1', 'guarantor2', 'emergencyContact'];
+  const currentKey = stepKeys[step - 1];
+  const isFinalStep = step === 3;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.stepText}>Step {step + 1} of 3</Text>
-      <Text style={styles.title}>Guarantor {step}</Text>
+      <Text style={styles.screenTitle}>Guarantor Details</Text>
+      <Text style={styles.stepText}>Step {step} of 3</Text>
+      <Text style={styles.title}>
+        {step === 3 ? 'Emergency Contact' : `Guarantor ${step}`}
+      </Text>
 
       <Text style={styles.label}>Full Name</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter full name"
-        value={guarantors[current].name}
-        onChangeText={(text) => handleChange(current, 'name', text)}
+        value={guarantors[currentKey].name}
+        onChangeText={(text) => handleChange(currentKey, 'name', text)}
       />
 
       <Text style={styles.label}>Phone Number</Text>
@@ -61,32 +67,32 @@ const GuarantorsScreen = ({ navigation, route }) => {
         style={styles.input}
         placeholder="Enter phone number"
         keyboardType="phone-pad"
-        value={guarantors[current].phone}
-        onChangeText={(text) => handleChange(current, 'phone', text)}
+        value={guarantors[currentKey].phone}
+        onChangeText={(text) => handleChange(currentKey, 'phone', text)}
       />
 
       <Text style={styles.label}>Relationship</Text>
       <TextInput
         style={styles.input}
         placeholder="e.g., Friend, Cousin"
-        value={guarantors[current].relationship}
-        onChangeText={(text) => handleChange(current, 'relationship', text)}
+        value={guarantors[currentKey].relationship}
+        onChangeText={(text) => handleChange(currentKey, 'relationship', text)}
       />
 
       <View style={styles.navButtons}>
-        {step === 2 && (
+        {step > 1 && (
           <TouchableOpacity style={styles.backButton} onPress={prevStep}>
             <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
         )}
 
-        {step === 1 ? (
-          <TouchableOpacity style={styles.nextButton} onPress={nextStep}>
-            <Text style={styles.nextText}>Next</Text>
-          </TouchableOpacity>
-        ) : (
+        {isFinalStep ? (
           <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
             <Text style={styles.nextText}>Submit Application</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.nextButton} onPress={nextStep}>
+            <Text style={styles.nextText}>Next</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -97,9 +103,16 @@ const GuarantorsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 60,
     backgroundColor: '#F8F5FF',
     flexGrow: 1,
+  },
+  screenTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6A0DAD',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,

@@ -10,11 +10,14 @@ import {
   Easing,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import api from '../api/client';
 import { AuthContext } from '../context/AuthContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ApplyNowScreen = () => {
   const navigation = useNavigation();
@@ -43,9 +46,7 @@ const ApplyNowScreen = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const repaymentTerms = Array.isArray(res.data.repaymentTerms)
-        ? res.data.repaymentTerms
-        : [];
+      const repaymentTerms = Array.isArray(res.data.repaymentTerms) ? res.data.repaymentTerms : [];
 
       setEligibleAmount(res.data.eligibleAmount);
       setMinAmount(res.data.minAmount || 1000);
@@ -62,8 +63,7 @@ const ApplyNowScreen = () => {
   };
 
   const numericAmount = parseInt(amount);
-  const isValidAmount =
-    numericAmount >= minAmount && numericAmount <= eligibleAmount;
+  const isValidAmount = numericAmount >= minAmount && numericAmount <= eligibleAmount;
 
   const animateIn = () => {
     Animated.timing(animation, {
@@ -122,8 +122,7 @@ const ApplyNowScreen = () => {
       navigation.navigate('LoanConfirmScreen', { loan: res.data.loan });
     } catch (err) {
       console.error('Loan apply error:', err);
-      const msg =
-        err?.response?.data?.message || 'Loan request failed. Try again.';
+      const msg = err?.response?.data?.message || 'Loan request failed. Try again.';
       Alert.alert('Error', msg);
     }
   };
@@ -131,21 +130,13 @@ const ApplyNowScreen = () => {
   const TermCard = ({ term }) => (
     <TouchableOpacity
       key={term.days}
-      style={[
-        styles.termCard,
-        selectedTerm?.days === term.days && styles.termCardSelected,
-      ]}
+      style={[styles.termCard, selectedTerm?.days === term.days && styles.termCardSelected]}
       onPress={() => {
         setSelectedTerm(term);
         setPreviewData(null);
       }}
     >
-      <Text
-        style={[
-          styles.termText,
-          selectedTerm?.days === term.days && { color: '#fff' },
-        ]}
-      >
+      <Text style={[styles.termText, selectedTerm?.days === term.days && { color: '#fff' }]}>
         {term.days} Days
       </Text>
     </TouchableOpacity>
@@ -161,80 +152,86 @@ const ApplyNowScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.shapeBg} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f4fd' }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.shapeBg} />
 
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.screenTitle}>Apply for Loan</Text>
-      </View>
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.screenTitle}>Apply for Loan</Text>
+          </View>
 
-      <View style={styles.card}>
-        <View style={styles.headerRow}>
-          <Text style={styles.label}>Your Eligible Loan:</Text>
-          <TouchableOpacity onPress={fetchLoanSettings}>
-            <Ionicons name="refresh" size={20} color="#5E17EB" style={{ marginLeft: 8 }} />
+          <View style={styles.card}>
+            <View style={styles.headerRow}>
+              <Text style={styles.label}>Your Eligible Loan:</Text>
+              <TouchableOpacity onPress={fetchLoanSettings}>
+                <Ionicons name="refresh" size={20} color="#5E17EB" style={{ marginLeft: 8 }} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.eligibleAmount}>₦{eligibleAmount.toLocaleString()}</Text>
+            <Text style={styles.orText}>Maintain good record to increase limit</Text>
+          </View>
+
+          <Text style={styles.label}>Choose Repayment Term</Text>
+          <View style={styles.termRow}>
+            {terms.map((term) => (
+              <TermCard key={term.days} term={term} />
+            ))}
+          </View>
+
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder={`Enter amount (₦${minAmount} - ₦${eligibleAmount})`}
+            value={amount}
+            onChangeText={handleChange}
+          />
+
+          {numericAmount > eligibleAmount && (
+            <Text style={styles.warningText}>
+              Amount exceeds your eligible limit of ₦{eligibleAmount.toLocaleString()}
+            </Text>
+          )}
+
+          <TouchableOpacity
+            style={[styles.button, !isValidAmount && styles.buttonDisabled]}
+            onPress={handlePreview}
+            disabled={!isValidAmount}
+          >
+            <Text style={styles.buttonText}>{previewing ? 'Previewing...' : 'Preview Loan'}</Text>
           </TouchableOpacity>
-        </View>
-        <Text style={styles.eligibleAmount}>₦{eligibleAmount.toLocaleString()}</Text>
-        <Text style={styles.orText}>Maintain good record to increase limit</Text>
-      </View>
 
-      <Text style={styles.label}>Choose Repayment Term</Text>
-      <View style={styles.termRow}>
-        {terms.map((term) => (
-          <TermCard key={term.days} term={term} />
-        ))}
-      </View>
+          {previewData && (
+            <Animated.View style={[styles.resultCard, { opacity: animation }]}>
+              <Text style={styles.resultText}>Interest: ₦{previewData.interest.toLocaleString()}</Text>
+              <Text style={styles.resultText}>Total Repayment: ₦{previewData.totalRepayment.toLocaleString()}</Text>
+              <Text style={styles.resultText}>Due Date: {previewData.dueDate}</Text>
+              <Text style={styles.resultText}>Overdue Charge: {previewData.overdueCharge}</Text>
+            </Animated.View>
+          )}
 
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        placeholder={`Enter amount (₦${minAmount} - ₦${eligibleAmount})`}
-        value={amount}
-        onChangeText={handleChange}
-      />
+          <Text style={styles.notice}>{notice}</Text>
 
-      {numericAmount > eligibleAmount && (
-        <Text style={styles.warningText}>
-          Amount exceeds your eligible limit of ₦{eligibleAmount.toLocaleString()}
-        </Text>
-      )}
-
-      <TouchableOpacity
-        style={[styles.button, !isValidAmount && styles.buttonDisabled]}
-        onPress={handlePreview}
-        disabled={!isValidAmount}
-      >
-        <Text style={styles.buttonText}>
-          {previewing ? 'Previewing...' : 'Preview Loan'}
-        </Text>
-      </TouchableOpacity>
-
-      {previewData && (
-        <Animated.View style={[styles.resultCard, { opacity: animation }]}>
-          <Text style={styles.resultText}>Interest: ₦{previewData.interest.toLocaleString()}</Text>
-          <Text style={styles.resultText}>Total Repayment: ₦{previewData.totalRepayment.toLocaleString()}</Text>
-          <Text style={styles.resultText}>Due Date: {previewData.dueDate}</Text>
-          <Text style={styles.resultText}>Overdue Charge: {previewData.overdueCharge}</Text>
-        </Animated.View>
-      )}
-
-      <Text style={styles.notice}>{notice}</Text>
-
-      {previewData && (
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Take Loan</Text>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
+          {previewData && (
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Take Loan</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#f6f4fd' },
+  container: { flex: 1, padding: 24 },
   shapeBg: {
     position: 'absolute',
     width: '200%',

@@ -5,10 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Alert,
-  SafeAreaView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import colors from '../theme/colors';
@@ -22,10 +22,7 @@ const AccountScreen = () => {
   const nameInitial = user?.name?.charAt(0)?.toUpperCase() || 'U';
 
   const menuItems = [
-    // { label: 'Loan Verification', icon: 'shield-checkmark-outline', screen: 'LoanVerificationScreen' },
-    // { label: 'Customer Support', icon: 'headset-outline', screen: 'ContactSupportScreen' },
     { label: 'Privacy Policy', icon: 'document-text-outline', screen: 'PolicyScreen' },
-    // { label: 'How It Works', icon: 'help-circle-outline', screen: 'HowItWorksScreen' },
     { label: 'FAQs', icon: 'information-circle-outline', screen: 'FaqScreen' },
   ];
 
@@ -37,11 +34,14 @@ const AccountScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Sticky Header */}
-      <View style={styles.stickyHeader}>
-        {/* <View style={styles.headerTop} /> */}
-        <View style={styles.headerBottom}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Top Header */}
+        <View style={styles.header}>
           <View style={styles.avatarBox}>
             <Text style={styles.avatarText}>{nameInitial}</Text>
           </View>
@@ -54,42 +54,10 @@ const AccountScreen = () => {
             </View>
           </View>
         </View>
-      </View>
 
-      {/* Scrollable Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: 50 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ height: 100 }} />
-
+        {/* Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
-
-           {/*<View style={styles.settingItem}>
-            <Text style={styles.settingText}>Notification</Text>
-            <Switch
-              value={user?.notificationsEnabled}
-              onValueChange={async (value) => {
-                try {
-                  // Optimistic update
-                  setUser({ ...user, notificationsEnabled: value });
-
-                  await api.put(
-                    '/me/notifications',
-                    { enabled: value },
-                    { headers: { Authorization: `Bearer ${user.token}` } }
-                  );
-                } catch (err) {
-                  console.error('Failed to update notifications', err);
-                  // Optionally revert on failure
-                  setUser({ ...user, notificationsEnabled: !value });
-                }
-              }}
-            />
-
-          </View> */}
 
           <TouchableOpacity
             style={styles.settingItem}
@@ -99,15 +67,13 @@ const AccountScreen = () => {
             <MaterialIcons name="keyboard-arrow-right" size={20} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.settingItem}
-            
-          >
+          <TouchableOpacity style={styles.settingItem}>
             <Text style={styles.settingText}>Notifications</Text>
             <MaterialIcons name="keyboard-arrow-right" size={20} />
           </TouchableOpacity>
         </View>
 
+        {/* More */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>More</Text>
           {menuItems.map((item) => (
@@ -122,6 +88,7 @@ const AccountScreen = () => {
           ))}
         </View>
 
+        {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -135,22 +102,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F8F8',
   },
-  stickyHeader: {
-    position: 'absolute',
-    width: '100%',
-    zIndex: 99,
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
-  headerTop: {
-    height: 40,
-    backgroundColor: colors.purple,
-  },
-  headerBottom: {
+  header: {
     backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    marginBottom: 10,
     borderBottomColor: '#eee',
+    borderBottomWidth: 1,
   },
   avatarBox: {
     width: 65,
@@ -195,13 +159,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#b88900',
   },
-  scrollView: {
-    flex: 1,
-  },
   section: {
     backgroundColor: '#fff',
     padding: 16,
     marginTop: 12,
+    borderRadius: 12,
   },
   sectionTitle: {
     fontSize: 16,
@@ -226,7 +188,8 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 40,
+    borderRadius: 12,
   },
   logoutText: {
     color: '#d9534f',
