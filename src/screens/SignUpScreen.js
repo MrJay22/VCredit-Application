@@ -51,12 +51,14 @@ export default function SignUpScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Full Name"
+        placeholderTextColor="#888"
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
@@ -64,6 +66,7 @@ export default function SignUpScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="6-digit Password"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         secureTextEntry
         maxLength={6}
@@ -73,6 +76,7 @@ export default function SignUpScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         secureTextEntry
         maxLength={6}
@@ -108,6 +112,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
+    color: '#000',
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,

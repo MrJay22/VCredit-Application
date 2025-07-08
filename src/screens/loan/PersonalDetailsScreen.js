@@ -9,6 +9,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  Image,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -22,10 +23,11 @@ export default function PersonalDetailsScreen({ navigation }) {
   const [accountName, setaccountName] = useState('');
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
-  const [photo, setPhoto] = useState(null);
+  const [photo, setPhoto] = useState(null); // live photo
+  const [idImage, setIdImage] = useState(null); // uploaded ID image
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleCameraLaunch = async () => {
+  const handleTakePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       return Alert.alert('Permission Denied', 'Camera access is needed');
@@ -39,7 +41,43 @@ export default function PersonalDetailsScreen({ navigation }) {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // ✅ FIXED: correct way to get URI
+      setIdImage(result.assets[0].uri);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.status !== 'granted') {
+      return Alert.alert('Permission Required', 'Media library access is required to select an ID image.');
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setIdImage(result.assets[0].uri);
+    }
+  };
+
+  const handleLivePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      return Alert.alert('Permission Denied', 'Camera access is needed');
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 0.5,
+      cameraType: 'front',
+    });
+
+    if (!result.canceled) {
+      setPhoto(result.assets[0].uri);
     }
   };
 
@@ -47,7 +85,7 @@ export default function PersonalDetailsScreen({ navigation }) {
     if (nin.length !== 11) {
       return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
     }
-    if (!dob || !address || !photo || !bankName || !accountNumber || !accountName) {
+    if (!dob || !address || !photo || !bankName || !accountNumber || !accountName || !idImage) {
       return Alert.alert('Incomplete Form', 'Please complete all fields.');
     }
 
@@ -59,6 +97,7 @@ export default function PersonalDetailsScreen({ navigation }) {
       dob,
       address,
       photo,
+      idImage,
     });
   };
 
@@ -85,12 +124,35 @@ export default function PersonalDetailsScreen({ navigation }) {
           maxLength={11}
         />
 
+        {/* ✅ Upload Valid ID */}
+        <Text style={styles.label}>Upload Valid ID (NIN, License, or Voter’s Card)</Text>
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+          <TouchableOpacity style={styles.uploadBtn} onPress={handleTakePhoto}>
+            <Text style={styles.uploadText}>Take Photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.uploadBtn} onPress={handlePickImage}>
+            <Text style={styles.uploadText}>Upload</Text>
+          </TouchableOpacity>
+        </View>
+        {idImage && (
+          <Image
+            source={{ uri: idImage }}
+            style={{ width: 100, height: 100, borderRadius: 10, marginBottom: 15 }}
+          />
+        )}
+
         <Text style={styles.label}>Bank Name</Text>
         <TextInput style={styles.input} value={bankName} onChangeText={setbankName} />
 
         <Text style={styles.label}>Account Number</Text>
-        <TextInput style={styles.input} value={accountNumber} onChangeText={setaccountNumber} keyboardType="numeric" maxLength={10} />
-        
+        <TextInput
+          style={styles.input}
+          value={accountNumber}
+          onChangeText={setaccountNumber}
+          keyboardType="numeric"
+          maxLength={10}
+        />
+
         <Text style={styles.label}>Account Name</Text>
         <TextInput style={styles.input} value={accountName} onChangeText={setaccountName} />
 
@@ -126,9 +188,9 @@ export default function PersonalDetailsScreen({ navigation }) {
           onChangeText={setAddress}
         />
 
-        <TouchableOpacity style={styles.photoBtn} onPress={handleCameraLaunch}>
+        <TouchableOpacity style={styles.photoBtn} onPress={handleLivePhoto}>
           <Text style={styles.photoBtnText}>
-            {photo ? 'Retake Photo' : 'Take Live Photo'}
+            {photo ? 'Retake Live Photo' : 'Take Live Photo'}
           </Text>
         </TouchableOpacity>
 
@@ -165,6 +227,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: '#fff',
+  },
+  uploadBtn: {
+    flex: 1,
+    backgroundColor: '#6A0DAD',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  uploadText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
   },
   photoBtn: {
     marginTop: 20,

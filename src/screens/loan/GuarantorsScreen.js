@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 const GuarantorsScreen = ({ navigation, route }) => {
   const { user } = useContext(AuthContext);
 
-  const { nin, bankName, accountNumber, accountName, dob, address, photo } = route.params;
+  const { nin, bankName, accountNumber, accountName, dob, address, photo, idImage } = route.params;
 
   const [step, setStep] = useState(1);
   const [guarantors, setGuarantors] = useState({
@@ -38,6 +38,7 @@ const GuarantorsScreen = ({ navigation, route }) => {
       dob,
       address,
       photo,
+      idImage,
       guarantors,
     });
   };

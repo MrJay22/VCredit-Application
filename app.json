@@ -8,9 +8,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "icon": "./src/assets/ocredit.png",
     "extra": {
       "eas": {
-        "projectId": "1f58d436-ae0e-4641-a59f-9d86ccca4ef3"
+        "projectId": "550d2f16-a538-4d3d-ac05-9df560a56afa"
       }
     },
     "android": {

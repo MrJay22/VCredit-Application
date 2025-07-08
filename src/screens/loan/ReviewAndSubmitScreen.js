@@ -15,7 +15,7 @@ import api from '../../api/client';
 export default function ReviewAndSubmitScreen({ navigation, route }) {
   const {
     name, phone, nin, bankName, accountNumber, accountName,
-    dob, address, photo, guarantors,
+    dob, address, photo, idImage, guarantors,
   } = route.params;
 
   const guarantor1 = guarantors?.guarantor1 || {};
@@ -28,7 +28,8 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
     try {
       if (
         !nin || !bankName || !accountNumber || !accountName ||
-        !dob || !address || !photo || !guarantor1.name || !guarantor2.name
+        !dob || !address || !photo || !idImage || !guarantor1.name || !guarantor1.phone || 
+        !guarantor2.name || !guarantor2.phone || !emergencyContact.name || !emergencyContact.phone
       ) {
         return Alert.alert('Incomplete', 'Please complete all required fields.');
       }
@@ -47,8 +48,10 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
           address,
         },
         photo,
+        idImage,
         guarantor1,
         guarantor2,
+        emergencyContact,
       };
 
       await api.post('/api/loan/apply', payload, {

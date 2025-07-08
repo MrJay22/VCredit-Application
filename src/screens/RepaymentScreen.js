@@ -6,9 +6,10 @@ import {
 import api from '../api/client';
 import colors from '../theme/colors';
 import { AuthContext } from '../context/AuthContext';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+
 
 const formatNaira = (val) => typeof val === 'number' ? `₦${val.toLocaleString()}` : '₦0';
 
@@ -23,6 +24,8 @@ const RepaymentScreen = () => {
   const [showDetail, setShowDetail] = useState(false);
   const navigation = useNavigation();
 
+
+  // Added states for declined loan display
   const [loanStatus, setLoanStatus] = useState(null);
   const [currentLoan, setCurrentLoan] = useState(null);
 
@@ -47,9 +50,10 @@ const RepaymentScreen = () => {
       const res = await api.get('/api/loan/loan-status', {
         headers: { Authorization: `Bearer ${user.token}` },
       });
+
       setHasCompletedForm?.(res.data.hasCompletedForm);
       setLoanStatus(res.data.status);
-      setCurrentLoan(res.data.loan || null);
+      setCurrentLoan(res.data.loan || null); // includes declineReason now
     } catch (err) {
       console.error('Loan status fetch error:', err);
     }
@@ -71,12 +75,14 @@ const RepaymentScreen = () => {
   const handleRepay = async () => {
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) return Alert.alert('Invalid', 'Enter a valid amount.');
+
     try {
       await api.post(
         '/api/loan/repay',
         { amount: numAmount },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
+
       setAmount('');
       Alert.alert('Success', `${formatNaira(numAmount)} repaid.`);
       await fetchLoanData();
@@ -97,12 +103,14 @@ const RepaymentScreen = () => {
       <p><strong>Loan ID:</strong> ${r.loanId}</p>
       <p>Thank you for repaying your loan.</p>
     `;
+
     try {
       const file = await RNHTMLtoPDF.convert({
         html,
         fileName: `RepaymentReceipt_${r._id}`,
         directory: 'Documents',
       });
+
       Alert.alert('Downloaded', `Receipt saved to:\n${file.filePath}`);
     } catch (error) {
       console.error('PDF error:', error);
@@ -148,9 +156,18 @@ const RepaymentScreen = () => {
         <Text style={styles.info}>Due Status: {dueIn}</Text>
 
         {(loan.status === 'running' || loan.status === 'overdue') && (
-          <TouchableOpacity style={styles.repayBtn} onPress={() => navigation.navigate('WalletScreen')}>
-            <Text style={styles.repayBtnText}>Repay Now</Text>
-          </TouchableOpacity>
+          <>
+            {/* <TextInput
+              style={styles.input}
+              placeholder="Enter amount to repay"
+              keyboardType="numeric"
+              value={amount}
+              onChangeText={setAmount}
+            /> */}
+            <TouchableOpacity style={styles.repayBtn} onPress={() => navigation.navigate('WalletScreen')}>
+              <Text style={styles.repayBtnText}>Repay Now</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
     );
@@ -176,13 +193,7 @@ const RepaymentScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.screenTitle}></Text>
-      </View>
+      <Text style={styles.header}>Loan Repayment</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color={colors.purple} />
@@ -230,21 +241,7 @@ const RepaymentScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9f9f9', padding: 20 },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  backButton: {
-    padding: 6,
-    marginRight: 10,
-  },
-  screenTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  header: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 20 },
   card: {
     backgroundColor: '#fff',
     padding: 18,
@@ -256,6 +253,15 @@ const styles = StyleSheet.create({
   statusText: { fontWeight: 'bold', marginBottom: 10 },
   amount: { fontSize: 24, fontWeight: 'bold', color: colors.purple, marginBottom: 6 },
   info: { fontSize: 14, color: '#666' },
+  input: {
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    fontSize: 16,
+  },
   repayBtn: {
     backgroundColor: colors.purple,
     paddingVertical: 14,

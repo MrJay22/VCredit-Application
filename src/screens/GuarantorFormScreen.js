@@ -40,6 +40,7 @@ const GuarantorFormScreen = ({ navigation, route }) => {
       <TextInput
         style={styles.input}
         placeholder="Enter full name"
+        placeholderTextColor="#888"
         value={guarantors[current].name}
         onChangeText={(text) => handleChange(current, 'name', text)}
       />
@@ -48,6 +49,7 @@ const GuarantorFormScreen = ({ navigation, route }) => {
       <TextInput
         style={styles.input}
         placeholder="Enter phone number"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         value={guarantors[current].phone}
         onChangeText={(text) => handleChange(current, 'phone', text)}
@@ -57,6 +59,7 @@ const GuarantorFormScreen = ({ navigation, route }) => {
       <TextInput
         style={styles.input}
         placeholder="e.g., Friend, Cousin"
+        placeholderTextColor="#888"
         value={guarantors[current].relationship}
         onChangeText={(text) => handleChange(current, 'relationship', text)}
       />
@@ -85,7 +88,7 @@ const GuarantorFormScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 40,
     backgroundColor: '#F8F5FF',
     flexGrow: 1,
   },

@@ -43,6 +43,7 @@ export default function SignInScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
@@ -51,6 +52,7 @@ export default function SignInScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#888"
         keyboardType="phone-pad"
         secureTextEntry
         maxLength={6}
@@ -88,6 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
+    color: '#000',
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
