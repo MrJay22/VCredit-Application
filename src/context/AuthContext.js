@@ -22,9 +22,11 @@ export function AuthProvider({ children }) {
           .catch(() => {
             AsyncStorage.removeItem('userToken');
             setUser(null);
+            setToken(null);
           });
       } else {
         setUser(null);
+        setToken(null);
       }
       setLoading(false);
     });
@@ -61,10 +63,11 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     await AsyncStorage.removeItem('userToken');
     setUser(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, token, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

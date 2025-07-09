@@ -18,6 +18,7 @@ import { AuthContext } from '../../context/AuthContext';
 export default function PersonalDetailsScreen({ navigation }) {
   const { user } = useContext(AuthContext);
   const [nin, setNin] = useState('');
+  const [occupation, setOccupation] = useState('');
   const [bankName, setbankName] = useState('');
   const [accountNumber, setaccountNumber] = useState('');
   const [accountName, setaccountName] = useState('');
@@ -81,25 +82,60 @@ export default function PersonalDetailsScreen({ navigation }) {
     }
   };
 
-  const handleNext = () => {
-    if (nin.length !== 11) {
-      return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
-    }
-    if (!dob || !address || !photo || !bankName || !accountNumber || !accountName || !idImage) {
-      return Alert.alert('Incomplete Form', 'Please complete all fields.');
-    }
+  const handleNext = async () => {
+  if (nin.length !== 11) {
+    return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
+  }
+  if (!dob || !occupation || !address || !photo || !bankName || !accountNumber || !accountName || !idImage) {
+    return Alert.alert('Incomplete Form', 'Please complete all fields.');
+  }
 
-    navigation.navigate('GuarantorsScreen', {
-      nin,
-      bankName,
-      accountNumber,
-      accountName,
-      dob,
-      address,
-      photo,
-      idImage,
+  try {
+    const formData = new FormData();
+    formData.append('photo', {
+      uri: photo,
+      name: 'live_photo.jpg',
+      type: 'image/jpeg',
     });
-  };
+    formData.append('idImage', {
+      uri: idImage,
+      name: 'id_image.jpg',
+      type: 'image/jpeg',
+    });
+
+    const res = await fetch('https://vcredit-backend.onrender.com/api/loan/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${user?.token}`,
+      },
+      body: formData,
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      // result.photoUrl and result.idImageUrl
+      navigation.navigate('GuarantorsScreen', {
+        nin,
+        occupation,
+        bankName,
+        accountNumber,
+        accountName,
+        dob,
+        address,
+        photo: result.photoUrl, // URL returned from backend
+        idImage: result.idImageUrl,
+      });
+    } else {
+      Alert.alert('Upload Failed', result?.message || 'Please try again');
+    }
+  } catch (err) {
+    console.error(err);
+    Alert.alert('Error', 'Failed to upload images');
+  }
+};
+
 
   return (
     <KeyboardAvoidingView
@@ -140,6 +176,8 @@ export default function PersonalDetailsScreen({ navigation }) {
             style={{ width: 100, height: 100, borderRadius: 10, marginBottom: 15 }}
           />
         )}
+        <Text style={styles.label}>Occupation</Text>
+        <TextInput style={styles.input} value={occupation} onChangeText={setOccupation} />
 
         <Text style={styles.label}>Bank Name</Text>
         <TextInput style={styles.input} value={bankName} onChangeText={setbankName} />
@@ -257,7 +295,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 35,
+    marginBottom: 150,
   },
   nextText: {
     color: '#fff',

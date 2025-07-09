@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     left: '-50%',
     zIndex: -1,
   },
-  topBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  topBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: 20},
   backButton: { padding: 6, marginRight: 10 },
   screenTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   card: {

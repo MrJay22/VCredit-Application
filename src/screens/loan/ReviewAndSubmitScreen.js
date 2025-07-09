@@ -10,11 +10,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
-import api from '../../api/client';
 
 export default function ReviewAndSubmitScreen({ navigation, route }) {
   const {
-    name, phone, nin, bankName, accountNumber, accountName,
+    name, phone, nin, occupation, bankName, accountNumber, accountName,
     dob, address, photo, idImage, guarantors,
   } = route.params;
 
@@ -24,49 +23,71 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
   const { user, token } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    try {
-      if (
-        !nin || !bankName || !accountNumber || !accountName ||
-        !dob || !address || !photo || !idImage || !guarantor1.name || !guarantor1.phone || 
-        !guarantor2.name || !guarantor2.phone || !emergencyContact.name || !emergencyContact.phone
-      ) {
-        return Alert.alert('Incomplete', 'Please complete all required fields.');
-      }
+const handleSubmit = async () => {
+  try {
+    if (
+      !nin || !occupation || !bankName || !accountNumber || !accountName ||
+      !dob || !address || !photo || !idImage || !guarantor1.name || !guarantor1.phone || 
+      !guarantor2.name || !guarantor2.phone || !emergencyContact.name || !emergencyContact.phone
+    ) {
+      return Alert.alert('Incomplete', 'Please complete all required fields.');
+    }
 
-      setLoading(true);
+    setLoading(true);
 
-      const payload = {
-        personalDetails: {
-          name: user.name,
-          phone: user.phone,
-          nin,
-          bankName,
-          accountNumber,
-          accountName,
-          dob,
-          address,
-        },
-        photo,
-        idImage,
-        guarantor1,
-        guarantor2,
-        emergencyContact,
-      };
+    const formData = new FormData();
+    formData.append('photo', {
+      uri: photo,
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+    });
 
-      await api.post('/api/loan/apply', payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    formData.append('idImage', {
+      uri: idImage,
+      name: 'idImage.jpg',
+      type: 'image/jpeg',
+    });
 
+    formData.append('personalDetails', JSON.stringify({
+      name: user.name,
+      phone: user.phone,
+      nin,
+      occupation,
+      bankName,
+      accountNumber,
+      accountName,
+      dob,
+      address,
+    }));
+
+    formData.append('guarantor1', JSON.stringify(guarantor1));
+    formData.append('guarantor2', JSON.stringify(guarantor2));
+    formData.append('emergencyContact', JSON.stringify(emergencyContact));
+
+    const res = await fetch(`https://vcredit-backend.onrender.com/api/loan/apply`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
       Alert.alert('Success', 'Loan application submitted');
       navigation.reset({ index: 0, routes: [{ name: 'LoanApprovalScreen' }] });
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      Alert.alert('Error', result?.message || 'Something went wrong.');
     }
-  };
+  } catch (err) {
+    console.error('Submit error:', err);
+    Alert.alert('Error', 'Something went wrong. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
@@ -77,14 +98,13 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
           <Text style={styles.nameText}>{name}</Text>
           <Text style={styles.phoneText}>{phone}</Text>
         </View>
-        {photo && (
-          <Image source={{ uri: photo }} style={styles.profileImage} />
-        )}
+        {photo && <Image source={{ uri: photo }} style={styles.profileImage} />}
       </View>
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Personal Information</Text>
         <Info label="NIN" value={nin} />
+        <Info label="Occupation" value={occupation} />
         <Info label="Bank Name" value={bankName} />
         <Info label="Account Number" value={accountNumber} />
         <Info label="Account Name" value={accountName} />
@@ -141,11 +161,7 @@ const Info = ({ label, value }) => (
 );
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#F8F5FF',
-    padding: 20,
-    flex: 1,
-  },
+  container: { backgroundColor: '#F8F5FF', padding: 20, flex: 1 },
   title: {
     fontSize: 22,
     fontWeight: '700',
@@ -160,20 +176,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  headerInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  nameText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#222',
-  },
-  phoneText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
+  headerInfo: { flex: 1, marginRight: 10 },
+  nameText: { fontSize: 20, fontWeight: '600', color: '#222' },
+  phoneText: { fontSize: 14, color: '#666', marginTop: 4 },
   profileImage: {
     width: 70,
     height: 70,
@@ -198,15 +203,8 @@ const styles = StyleSheet.create({
     color: '#6A0DAD',
     marginBottom: 10,
   },
-  label: {
-    fontSize: 13,
-    color: '#777',
-  },
-  value: {
-    fontSize: 15,
-    color: '#222',
-    fontWeight: '500',
-  },
+  label: { fontSize: 13, color: '#777' },
+  value: { fontSize: 15, color: '#222', fontWeight: '500' },
   buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -221,10 +219,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  editButtonText: {
-    fontSize: 15,
-    color: '#555',
-  },
+  editButtonText: { fontSize: 15, color: '#555' },
   submitButton: {
     flex: 1,
     backgroundColor: '#6A0DAD',

@@ -11,11 +11,11 @@
     "icon": "./src/assets/ocredit.png",
     "extra": {
       "eas": {
-        "projectId": "550d2f16-a538-4d3d-ac05-9df560a56afa"
+        "projectId": "33332bed-a323-40cf-8468-2033be099864"
       }
     },
     "android": {
-      "package": "com.mrjay22.VCredit"
+      "package": "com.mrjay234.VCredit"
     }
   }
 }

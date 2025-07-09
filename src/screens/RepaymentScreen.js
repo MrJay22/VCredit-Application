@@ -241,7 +241,7 @@ const RepaymentScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9f9f9', padding: 20 },
-  header: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 20, marginTop: 20 },
   card: {
     backgroundColor: '#fff',
     padding: 18,

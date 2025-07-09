@@ -160,7 +160,7 @@ const fetchData = async () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, color: '#333' },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, marginTop: 20, color: '#333' },
   card: {
     backgroundColor: '#f9f9f9',
     padding: 18,
