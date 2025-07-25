@@ -23,6 +23,7 @@ import LoanDetailsScreen from '../screens/loan/LoanDetailsScreen';
 import RepaymentDetail from '../screens/RepaymentDetail';
 import WalletScreen from '../screens/WalletScreen';
 import RepaymentScreen from '../screens/RepaymentScreen';
+import TermsAndConditionsScreen from '../screens/TermsAndConditionsScreen'
 
 
 const Stack = createStackNavigator();
@@ -151,7 +152,12 @@ export default function RootNavigator() {
           <Stack.Screen
             name="PolicyScreen"
             component={PolicyScreen}
-            options={{ headerShown: true, title: 'Policies' }}
+            options={{ headerShown: false, title: 'Policies' }}
+          />
+          <Stack.Screen
+            name="TermsAndConditionsScreen"
+            component={TermsAndConditionsScreen}
+            options={{ headerShown: true, title: 'TermsAndConditions' }}
           />
           <Stack.Screen
             name="LoanVerificationScreen"

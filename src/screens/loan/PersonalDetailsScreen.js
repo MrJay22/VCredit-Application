@@ -24,8 +24,8 @@ export default function PersonalDetailsScreen({ navigation }) {
   const [accountName, setaccountName] = useState('');
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
-  const [photo, setPhoto] = useState(null); // live photo
-  const [idImage, setIdImage] = useState(null); // uploaded ID image
+  const [photo, setPhoto] = useState(null);
+  const [idImage, setIdImage] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleTakePhoto = async () => {
@@ -38,7 +38,7 @@ export default function PersonalDetailsScreen({ navigation }) {
       allowsEditing: true,
       aspect: [4, 4],
       quality: 0.5,
-      cameraType: 'front',
+      cameraType: 'back',
     });
 
     if (!result.canceled) {
@@ -49,7 +49,7 @@ export default function PersonalDetailsScreen({ navigation }) {
   const handlePickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.status !== 'granted') {
-      return Alert.alert('Permission Required', 'Media library access is required to select an ID image.');
+      return Alert.alert('Permission Required', 'Media library access is required.');
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -83,39 +83,45 @@ export default function PersonalDetailsScreen({ navigation }) {
   };
 
   const handleNext = async () => {
-  if (nin.length !== 11) {
-    return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
-  }
-  if (!dob || !occupation || !address || !photo || !bankName || !accountNumber || !accountName || !idImage) {
-    return Alert.alert('Incomplete Form', 'Please complete all fields.');
-  }
+    if (nin.length !== 11) {
+      return Alert.alert('Invalid BVN', 'BVN must be exactly 11 digits.');
+    }
 
-  try {
-    const formData = new FormData();
-    formData.append('photo', {
-      uri: photo,
-      name: 'live_photo.jpg',
-      type: 'image/jpeg',
-    });
-    formData.append('idImage', {
-      uri: idImage,
-      name: 'id_image.jpg',
-      type: 'image/jpeg',
-    });
+    if (!dob || !occupation || !address || !photo || !bankName || !accountNumber || !accountName || !idImage) {
+      return Alert.alert('Incomplete Form', 'Please complete all fields.');
+    }
 
-    const res = await fetch('https://vcredit-backend.onrender.com/api/loan/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${user?.token}`,
-      },
-      body: formData,
-    });
+    try {
+      const formData = new FormData();
 
-    const result = await res.json();
+      formData.append('photo', {
+        uri: photo,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      });
 
-    if (res.ok) {
-      // result.photoUrl and result.idImageUrl
+      formData.append('idImage', {
+        uri: idImage,
+        name: 'idImage.jpg',
+        type: 'image/jpeg',
+      });
+
+      const response = await fetch('https://vcredit-backend.onrender.com/api/loan/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return Alert.alert('Upload Failed', result.message || 'Image upload failed');
+      }
+
+      const { photoUrl, idImageUrl } = result;
+
       navigation.navigate('GuarantorsScreen', {
         nin,
         occupation,
@@ -124,24 +130,18 @@ export default function PersonalDetailsScreen({ navigation }) {
         accountName,
         dob,
         address,
-        photo: result.photoUrl, // URL returned from backend
-        idImage: result.idImageUrl,
+        photo: photoUrl,
+        idImage: idImageUrl,
       });
-    } else {
-      Alert.alert('Upload Failed', result?.message || 'Please try again');
-    }
-  } catch (err) {
-    console.error(err);
-    Alert.alert('Error', 'Failed to upload images');
-  }
-};
 
+    } catch (err) {
+      console.error('Image upload error:', err);
+      Alert.alert('Error', 'Failed to upload images. Please try again.');
+    }
+  };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={styles.heading}>Complete Your Details</Text>
 
@@ -160,7 +160,6 @@ export default function PersonalDetailsScreen({ navigation }) {
           maxLength={11}
         />
 
-        {/* ✅ Upload Valid ID */}
         <Text style={styles.label}>Upload Valid ID (NIN, License, or Voter’s Card)</Text>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
           <TouchableOpacity style={styles.uploadBtn} onPress={handleTakePhoto}>
@@ -171,11 +170,9 @@ export default function PersonalDetailsScreen({ navigation }) {
           </TouchableOpacity>
         </View>
         {idImage && (
-          <Image
-            source={{ uri: idImage }}
-            style={{ width: 100, height: 100, borderRadius: 10, marginBottom: 15 }}
-          />
+          <Image source={{ uri: idImage }} style={{ width: 100, height: 100, borderRadius: 10, marginBottom: 15 }} />
         )}
+
         <Text style={styles.label}>Occupation</Text>
         <TextInput style={styles.input} value={occupation} onChangeText={setOccupation} />
 
@@ -199,9 +196,7 @@ export default function PersonalDetailsScreen({ navigation }) {
           style={[styles.input, { justifyContent: 'center' }]}
           onPress={() => setShowDatePicker(true)}
         >
-          <Text style={{ color: dob ? '#000' : '#aaa' }}>
-            {dob || 'Select Date of Birth'}
-          </Text>
+          <Text style={{ color: dob ? '#000' : '#aaa' }}>{dob || 'Select Date of Birth'}</Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker
@@ -220,11 +215,7 @@ export default function PersonalDetailsScreen({ navigation }) {
         )}
 
         <Text style={styles.label}>Home Address</Text>
-        <TextInput
-          style={styles.input}
-          value={address}
-          onChangeText={setAddress}
-        />
+        <TextInput style={styles.input} value={address} onChangeText={setAddress} />
 
         <TouchableOpacity style={styles.photoBtn} onPress={handleLivePhoto}>
           <Text style={styles.photoBtnText}>

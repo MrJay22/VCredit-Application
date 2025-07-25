@@ -12,7 +12,6 @@ export default function LoanApplyNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="PersonalDetailsScreen" component={PersonalDetailsScreen} options={{ title: 'Your Details' }} />
       <Stack.Screen name="GuarantorsScreen" component={GuarantorsScreen} options={{ title: 'Guarantors' }} />
-      {/* <Stack.Screen name="CapturePhotoScreen" component={CapturePhotoScreen} options={{ title: 'Passport Photo' }} /> */}
       <Stack.Screen name="ReviewAndSubmitScreen" component={ReviewAndSubmitScreen} options={{ title: 'Review & Submit' }} />
     </Stack.Navigator>
   );

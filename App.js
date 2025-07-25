@@ -11,8 +11,8 @@ export default function App() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AuthProvider>
+          <StatusBar style="dark" backgroundColor="#F8F5FF" />
           <NavigationContainer>
-            <StatusBar style="dark" backgroundColor="#F8F5FF" />
             <RootNavigator />
           </NavigationContainer>
         </AuthProvider>
@@ -20,3 +20,4 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+

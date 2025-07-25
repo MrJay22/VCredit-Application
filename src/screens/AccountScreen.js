@@ -23,7 +23,7 @@ const AccountScreen = () => {
 
   const menuItems = [
     { label: 'Privacy Policy', icon: 'document-text-outline', screen: 'PolicyScreen' },
-    { label: 'FAQs', icon: 'information-circle-outline', screen: 'FaqScreen' },
+    { label: 'Terms & Condition', icon: 'information-circle-outline', screen: 'TermsAndConditionsScreen' },
   ];
 
   const handleLogout = () => {

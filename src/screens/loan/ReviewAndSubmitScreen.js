@@ -23,71 +23,64 @@ export default function ReviewAndSubmitScreen({ navigation, route }) {
   const { user, token } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
-const handleSubmit = async () => {
-  try {
-    if (
-      !nin || !occupation || !bankName || !accountNumber || !accountName ||
-      !dob || !address || !photo || !idImage || !guarantor1.name || !guarantor1.phone || 
-      !guarantor2.name || !guarantor2.phone || !emergencyContact.name || !emergencyContact.phone
-    ) {
-      return Alert.alert('Incomplete', 'Please complete all required fields.');
+  const handleSubmit = async () => {
+    try {
+      if (
+        !nin || !occupation || !bankName || !accountNumber || !accountName ||
+        !dob || !address || !photo || !idImage ||
+        !guarantor1.name || !guarantor1.phone ||
+        !guarantor2.name || !guarantor2.phone ||
+        !emergencyContact.name || !emergencyContact.phone
+      ) {
+        return Alert.alert('Incomplete', 'Please complete all required fields.');
+      }
+
+      setLoading(true);
+
+      const payload = {
+        personalDetails: {
+          name: user.name,
+          phone: user.phone,
+          nin,
+          occupation,
+          bankName,
+          accountNumber,
+          accountName,
+          dob,
+          address,
+          photo,     // Cloudinary URL
+          idImage,   // Cloudinary URL
+        },
+        guarantor1,
+        guarantor2,
+        emergencyContact,
+      };
+
+      const res = await fetch(`https://vcredit-backend.onrender.com/api/loan/apply`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      console.log('Apply response:', result);
+
+      if (res.ok) {
+        Alert.alert('Success', 'Loan application submitted');
+        navigation.reset({ index: 0, routes: [{ name: 'LoanApprovalScreen' }] });
+      } else {
+        Alert.alert('Error', result?.message || 'Something went wrong.');
+      }
+    } catch (err) {
+      console.error('Submit error:', err);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append('photo', {
-      uri: photo,
-      name: 'photo.jpg',
-      type: 'image/jpeg',
-    });
-
-    formData.append('idImage', {
-      uri: idImage,
-      name: 'idImage.jpg',
-      type: 'image/jpeg',
-    });
-
-    formData.append('personalDetails', JSON.stringify({
-      name: user.name,
-      phone: user.phone,
-      nin,
-      occupation,
-      bankName,
-      accountNumber,
-      accountName,
-      dob,
-      address,
-    }));
-
-    formData.append('guarantor1', JSON.stringify(guarantor1));
-    formData.append('guarantor2', JSON.stringify(guarantor2));
-    formData.append('emergencyContact', JSON.stringify(emergencyContact));
-
-    const res = await fetch(`https://vcredit-backend.onrender.com/api/loan/apply`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      Alert.alert('Success', 'Loan application submitted');
-      navigation.reset({ index: 0, routes: [{ name: 'LoanApprovalScreen' }] });
-    } else {
-      Alert.alert('Error', result?.message || 'Something went wrong.');
-    }
-  } catch (err) {
-    console.error('Submit error:', err);
-    Alert.alert('Error', 'Something went wrong. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
@@ -98,7 +91,12 @@ const handleSubmit = async () => {
           <Text style={styles.nameText}>{name}</Text>
           <Text style={styles.phoneText}>{phone}</Text>
         </View>
-        {photo && <Image source={{ uri: photo }} style={styles.profileImage} />}
+        {photo && (
+          <Image
+            source={{ uri: photo }}
+            style={styles.profileImage}
+          />
+        )}
       </View>
 
       <View style={styles.card}>

@@ -1,11 +1,21 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 
 const GuarantorsScreen = ({ navigation, route }) => {
   const { user } = useContext(AuthContext);
-
-  const { nin, occupation, bankName, accountNumber, accountName, dob, address, photo, idImage } = route.params;
+  const {
+    nin, occupation, bankName, accountNumber,
+    accountName, dob, address, photo, idImage,
+  } = route.params;
 
   const [step, setStep] = useState(1);
   const [guarantors, setGuarantors] = useState({
@@ -13,6 +23,10 @@ const GuarantorsScreen = ({ navigation, route }) => {
     guarantor2: { name: '', phone: '', relationship: '' },
     emergencyContact: { name: '', phone: '', relationship: '' },
   });
+
+  const stepKeys = ['guarantor1', 'guarantor2', 'emergencyContact'];
+  const currentKey = stepKeys[step - 1];
+  const isFinalStep = step === stepKeys.length;
 
   const handleChange = (key, field, value) => {
     setGuarantors(prev => ({
@@ -24,10 +38,22 @@ const GuarantorsScreen = ({ navigation, route }) => {
     }));
   };
 
-  const nextStep = () => setStep(step + 1);
+  const nextStep = () => {
+    const { name, phone, relationship } = guarantors[currentKey];
+    if (!name || !phone || !relationship) {
+      return Alert.alert('Incomplete', 'Please fill all fields before proceeding.');
+    }
+    setStep(step + 1);
+  };
+
   const prevStep = () => setStep(step - 1);
 
   const handleSubmit = () => {
+    const { name, phone, relationship } = guarantors[currentKey];
+    if (!name || !phone || !relationship) {
+      return Alert.alert('Incomplete', 'Please fill all fields before submitting.');
+    }
+
     navigation.navigate('ReviewAndSubmitScreen', {
       name: user.name,
       phone: user.phone,
@@ -43,10 +69,6 @@ const GuarantorsScreen = ({ navigation, route }) => {
       guarantors,
     });
   };
-
-  const stepKeys = ['guarantor1', 'guarantor2', 'emergencyContact'];
-  const currentKey = stepKeys[step - 1];
-  const isFinalStep = step === 3;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -88,15 +110,14 @@ const GuarantorsScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         )}
 
-        {isFinalStep ? (
-          <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
-            <Text style={styles.nextText}>Submit Application</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.nextButton} onPress={nextStep}>
-            <Text style={styles.nextText}>Next</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={isFinalStep ? handleSubmit : nextStep}
+        >
+          <Text style={styles.nextText}>
+            {isFinalStep ? 'Submit Application' : 'Next'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -121,6 +142,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#6A0DAD',
     marginBottom: 20,
+  },
+  stepText: {
+    color: '#6A0DAD',
+    marginBottom: 10,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   label: {
     fontSize: 14,
@@ -158,11 +185,6 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: '#333',
-    fontWeight: '600',
-  },
-  stepText: {
-    color: '#6A0DAD',
-    marginBottom: 10,
     fontWeight: '600',
   },
 });
